@@ -1,0 +1,82 @@
+import urllib.request
+from bs4 import BeautifulSoup
+from openpyxl import load_workbook
+
+
+for n in range(1,5):
+# Call excel file
+	book = load_workbook(filename = r'Links.xlsx')
+	sheet_ranges = book.get_sheet_by_name(name = 'Sheet1')
+	link = sheet_ranges.cell('A'+ str(n) ).value
+
+# Write Excel
+	m = n
+	wb = load_workbook(filename= r'Output.xlsx')
+	ws = wb.get_sheet_by_name(name = 'Output')
+	name_output = ws.cell('A' + str(m))
+	contact_output = ws.cell('B' + str(m))
+	email_output = ws.cell('D' + str(m))
+	state_output = ws.cell('E' + str(m))
+	city_output = ws.cell('F' + str(m))
+
+# URL Link and url test
+	try:
+		urllib.request.urlopen("http://www.usyouthsoccer.org/" + link)
+	except:
+		print ("No Page Found")
+		continue
+
+	url = urllib.request.urlopen("http://www.usyouthsoccer.org/" + link)
+	soup = BeautifulSoup(url)
+
+# HTML Tag Finder
+	name = soup.find("h3")
+	contact = soup.find("dl",{"id":"CT_Main_2_trPrimaryContactName"})
+	email = soup.find("dl",{"id":"CT_Main_2_trGeneralEmail"})
+	state = soup.find("dl",{"id":"CT_Main_2_trState"})
+	city = soup.find("dl",{"id":"CT_Main_2_trCity"})
+
+
+# Tag Check
+	resultemail = soup.find("dl",{"id":"CT_Main_2_trGeneralEmail"})
+	resultname = soup.find("h3")
+	resultcontact = soup.find("dl",{"id":"CT_Main_2_trPrimaryContactName"})
+	resultstate = soup.find("dl",{"id":"CT_Main_2_trState"})
+	resultcity = soup.find("dl",{"id":"CT_Main_2_trCity"})
+
+# Writer
+
+	if resultname:
+		print(name.text)
+	else:
+		print ("NAME MISSING")
+	if resultcontact:
+		print(contact.text)
+	else:
+		print ("CONTACT MISSING")
+	if resultemail:
+		print (email.text)
+	else:
+		print ("EMAIL MISSING")
+	if resultstate:	
+		print(state.text)
+	else:
+		print ("STATE MISSING")
+	if resultcity:
+		print(city.text)
+	else:
+		print ("CITY MISSING")
+
+# Write to Excel
+
+	if resultname:
+		name_output.value = name.text
+	if resultcontact:
+		contact_output.value = contact.text
+	if resultemail:
+		email_output.value = email.text
+	if resultstate:	
+		state_output.value = state.text
+	if resultcity:
+		city_output.value = city.text
+	wb.save('Output.xlsx')
